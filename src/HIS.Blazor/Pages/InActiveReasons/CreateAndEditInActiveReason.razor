@@ -1,0 +1,213 @@
+﻿@page "/CreateInActiveReason"
+@page "/EditInActiveReason/{Id:guid}"
+@using HIS.InActiveReasons
+@using HIS.Blazor.Helper
+@using HIS.Enums
+@inject IInActiveReasonAppService InActiveReasonAppService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<Card>
+
+    <CardBody>
+        <CardTitle Size="5">@Title InActiveReason</CardTitle>
+
+        <EditForm Model="InActiveReasonDto" OnValidSubmit="CreateAndUpdateAsync">
+            <DataAnnotationsValidator />
+            <div class="row">
+
+                <div class="col-3">
+                    <div class="form-group">
+                        <DisplayName For="@(() => InActiveReasonDto.Name)" />
+                        <InputText class="form-control" @bind-Value="InActiveReasonDto.Name"></InputText>
+                        <div class="text-danger">
+                            <ValidationMessage For="()=>InActiveReasonDto.Name"></ValidationMessage>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-3">
+                    <div class="form-group">
+                        <label>Description</label>
+                        <InputText class="form-control" @bind-Value="InActiveReasonDto.Description"></InputText>
+                        <div class="text-danger">
+                            <ValidationMessage For="()=>InActiveReasonDto.Description"></ValidationMessage>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col-3">
+                    <div class="form-group">
+                        <label>Sequence</label>
+                        <InputNumber class="form-control" @bind-Value="InActiveReasonDto.Sequence"></InputNumber>
+                        <div class="text-danger">
+                            <ValidationMessage For="()=>InActiveReasonDto.Sequence"></ValidationMessage>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-3">
+                    <div class="form-group">
+                        <DisplayName For="@(()=>InActiveReasonDto.InActiveStatus)"></DisplayName>
+                        <InputSelect class="form-select" @bind-Value="InActiveReasonDto.InActiveStatus">
+                            @foreach (InActiveStatusEnum inActiveStatusEnum in Enum.GetValues(typeof(InActiveStatusEnum)))
+                            {
+                                <option value="@inActiveStatusEnum">
+                                    @inActiveStatusEnum.GetDisplayAttributeValues().Name
+                                </option>
+                            }
+                        </InputSelect>
+
+                        <div class="text-danger">
+                            <ValidationMessage For="()=>InActiveReasonDto.InActiveStatus"></ValidationMessage>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            <Div Class="row">
+                <div class="col-12">
+                    <div class="form-group">
+                        <label>Comments</label>
+                        <InputTextArea class="form-control" @bind-Value="InActiveReasonDto.Comments">
+
+                        </InputTextArea>
+                    </div>
+                </div>
+            </Div>
+            <div class="row">
+                <div class="col-3">
+                    <div class="form-check">
+                        <InputCheckbox @onclick="@CheckBoxChanged" class="form-check-input isDefaultIndicator" @bind-Value="InActiveReasonDto.IsDefaultIndicator">
+
+                        </InputCheckbox>
+                        <label class="form-check-label">
+                            IsDefaultIndicator
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <InputCheckbox class="form-check-input" @bind-Value="InActiveReasonDto.IsSystemIndicator">
+
+                        </InputCheckbox>
+                        <label class="form-check-label">
+                            IsSystemIndicator
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4">
+                    <div class="form-group">
+                        <button @onclick="OnClickButton" class="btn btn-primary btnSubmitLookUpForm" type="submit">@Title</button>
+                        <NavLink href="InActiveReasons" class="btn btn-secondary">Back</NavLink>
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+
+    </CardBody>
+</Card>
+
+<div class="modal fade isSystemIndicatorModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">IsDefaultIndicator</h5>
+                <button @onclick="BtnNoModal" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure to make this record as default selection ?
+            </div>
+            <div class="modal-footer">
+                <button @onclick="BtnNoModal" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button @onclick="CreateAndUpdateAsync" type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+    private InActiveReasonDto InActiveReasonDto { get; set; } = new InActiveReasonDto();
+    public string Title { get; set; } = "Create";
+
+
+    private async Task CheckBoxChanged()
+    {
+        await JSRuntime.InvokeVoidAsync("OnChangeCheckBoxIsDefaultIndicator");
+    }
+
+    private async Task OnClickButton()
+    {
+        await JSRuntime.InvokeVoidAsync("OnClickButton");
+    }
+
+    private async Task BtnNoModal()
+    {
+        await JSRuntime.InvokeVoidAsync("BtnNoModal");
+    }
+
+    private async Task BtnYesModal()
+    {
+        await JSRuntime.InvokeVoidAsync("BtnYesModal");
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        await JSRuntime.InvokeVoidAsync("OnLoadPage");
+
+        if (Id.HasValue)
+        {
+            Title = "Update";
+            InActiveReasonDto = await InActiveReasonAppService.GetAsync(Id.Value);
+        }
+        else
+        {
+            InActiveReasonDto = new InActiveReasonDto();
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        //if (firstRender)
+        //{
+        await JSRuntime.InvokeVoidAsync("InitSelect2");
+
+        //}
+    }
+
+    private async Task CreateAndUpdateAsync()
+    {
+
+        try
+        {
+            if (Id.HasValue && Title == "Update")
+            {
+                await JSRuntime.InvokeVoidAsync("BtnNoModal");
+                await InActiveReasonAppService.UpdateAsync(Id.Value, InActiveReasonDto);
+                await JSRuntime.ToastrSuccess("Operation is successfull");
+                NavigationManager.NavigateTo("InActiveReasons");
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("BtnNoModal");
+                await InActiveReasonAppService.CreateAsync(InActiveReasonDto);
+                await JSRuntime.ToastrSuccess("Operation is successfull");
+                NavigationManager.NavigateTo("InActiveReasons");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("BtnNoModal");
+            await JSRuntime.ToastrError("Operation is failed");
+            NavigationManager.NavigateTo("InActiveReasons");
+        }
+
+    }
+}

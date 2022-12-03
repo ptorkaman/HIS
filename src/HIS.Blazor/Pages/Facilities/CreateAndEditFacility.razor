@@ -1,0 +1,181 @@
+﻿@page "/CreateFacility"
+@page "/EditFacility/{Id:guid}"
+@using HIS.Facilities
+@inject IFacilityAppService FacilityAppService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<Card>
+
+    <CardBody>
+        <CardTitle Size="5">@Title Facility</CardTitle>
+
+        <EditForm Model="FacilityDto" OnValidSubmit="CreateAndUpdateAsync">
+            <DataAnnotationsValidator />
+            <div class="row">
+
+                <div class="col-4">
+                    <div class="form-group">
+                        <DisplayName For="@(() => FacilityDto.Name)" />
+                        <InputText class="form-control" @bind-Value="FacilityDto.Name"></InputText>
+                        <div class="text-danger">
+                            <ValidationMessage For="()=>FacilityDto.Name"></ValidationMessage>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-4">
+                    <div class="form-group">
+                        <label>Description</label>
+                        <InputText class="form-control" @bind-Value="FacilityDto.Description"></InputText>
+                        <div class="text-danger">
+                            <ValidationMessage For="()=>FacilityDto.Description"></ValidationMessage>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col-4">
+                    <div class="form-group">
+                        <label>Sequence</label>
+                        <InputNumber class="form-control" @bind-Value="FacilityDto.Sequence"></InputNumber>
+                        <div class="text-danger">
+                            <ValidationMessage For="()=>FacilityDto.Sequence"></ValidationMessage>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <Div Class="row">
+                <div class="col-12">
+                    <div class="form-group">
+                        <label>Comments</label>
+                        <InputTextArea class="form-control" @bind-Value="FacilityDto.Comments">
+
+                        </InputTextArea>
+                    </div>
+                </div>
+            </Div>
+            <div class="row">
+                <div class="col-3">
+                    <div class="form-check">
+                        <InputCheckbox @onclick="@CheckBoxChanged" class="form-check-input isDefaultIndicator" @bind-Value="FacilityDto.IsDefaultIndicator">
+
+                        </InputCheckbox>
+                        <label class="form-check-label">
+                            IsDefaultIndicator
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <InputCheckbox  class="form-check-input" @bind-Value="FacilityDto.IsSystemIndicator">
+
+                        </InputCheckbox>
+                        <label class="form-check-label">
+                            IsSystemIndicator
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4">
+                    <div class="form-group">
+                        <button @onclick="OnClickButton" class="btn btn-primary btnSubmitLookUpForm" type="submit">@Title</button>
+                        <NavLink href="Facilities" class="btn btn-secondary">Back</NavLink>
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+
+    </CardBody>
+</Card>
+
+<div class="modal fade isSystemIndicatorModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">IsDefaultIndicator</h5>
+                <button @onclick="BtnNoModal" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure to make this record as default selection ?
+            </div>
+            <div class="modal-footer">
+                <button @onclick="BtnNoModal" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button @onclick="CreateAndUpdateAsync" type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+    private FacilityDto FacilityDto { get; set; } = new FacilityDto();
+    public string Title { get; set; } = "Create";
+
+
+    private async Task CheckBoxChanged()
+    {
+        await JSRuntime.InvokeVoidAsync("OnChangeCheckBoxIsDefaultIndicator");
+    }
+
+    private async Task OnClickButton()
+    {
+        await JSRuntime.InvokeVoidAsync("OnClickButton");
+    }
+
+    private async Task BtnNoModal()
+    {
+        await JSRuntime.InvokeVoidAsync("BtnNoModal");
+    }
+
+    private async Task BtnYesModal()
+    {
+        await JSRuntime.InvokeVoidAsync("BtnYesModal");
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("OnLoadPage");
+
+        if (Id.HasValue)
+        {
+            Title = "Update";
+            FacilityDto = await FacilityAppService.GetAsync(Id.Value);
+        }
+        else
+        {
+            FacilityDto = new FacilityDto();
+        }
+    }
+
+    private async Task CreateAndUpdateAsync()
+    {
+
+        try
+        {
+            if (Id.HasValue && Title == "Update")
+            {
+                await JSRuntime.InvokeVoidAsync("BtnNoModal");
+                await FacilityAppService.UpdateAsync(Id.Value, FacilityDto);
+                await JSRuntime.ToastrSuccess("Operation is successfull");
+                NavigationManager.NavigateTo("Facilities");
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("BtnNoModal");
+                await FacilityAppService.CreateAsync(FacilityDto);
+                await JSRuntime.ToastrSuccess("Operation is successfull");
+                NavigationManager.NavigateTo("Facilities");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("BtnNoModal");
+            await JSRuntime.ToastrError("Operation is failed");
+            NavigationManager.NavigateTo("Facilities");
+        }
+
+    }
+}

@@ -1,0 +1,128 @@
+﻿@page "/Nationalities"
+@using HIS.Nationalities
+@using HIS.Localization
+@using Volo.Abp.AspNetCore.Components.Web
+@inherits HISComponentBase
+@inject INationalityAppService NationalityAppService
+
+<Div Class="row">
+    <Div Class="col-12">
+        <Card>
+            <CardHeader>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <input placeholder="search a value..." @bind="FilterValue" type="text" class="form-control" />
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-3">
+                        <Button Color="Color.Primary" Clicked="@(()=>GetNationalitiesAsync())">Search</Button>
+                    </div>
+                </div>
+
+            </CardHeader>
+        </Card>
+    </Div>
+</Div>
+
+<Div Class="row mt-2">
+    <Div Class="col-12">
+        <Card>
+            <CardHeader>
+                <Row Class="justify-content-between">
+                    <Column ColumnSize="ColumnSize.IsAuto">
+                        <h2>Nationalities</h2>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.IsAuto">
+
+                        @* @if (CanCreateAuthor)
+                        {*@
+                        <NavLink href="CreateNationality" class="btn btn-primary">Create Nationality</NavLink>
+                        @* }*@
+
+                    </Column>
+                </Row>
+            </CardHeader>
+            <CardBody>
+                <DataGrid TItem="NationalityDto"
+                          Data="NationalityList"
+                          ReadData="OnDataGridReadAsync"
+                          TotalItems="TotalCount"
+                          ShowPager="true"
+                          PageSize="PageSize"
+                          Hoverable="true"
+                          Filterable="true"
+                          FilterMethod="DataGridFilterMethod.Contains">
+
+                    <DataGridColumns>
+                        <DataGridColumn Width="150px"
+                                        TItem="NationalityDto"
+                                        Field="@nameof(HIS.Nationalities.NationalityDto.Id)"
+                                        Sortable="false"
+                                        Caption="Actions"
+                                        Filterable="false">
+                            <DisplayTemplate>
+                                <Dropdown>
+                                    <DropdownToggle Color="Color.Primary">
+                                        Actions
+                                    </DropdownToggle>
+                                    <DropdownMenu>
+                                        @*@if (CanEditAuthor)
+                                        {*@
+                                        <a href="@($"/EditNationality/{context.Id}")" class="dropdown-item">
+                                            Edit
+                                        </a>
+                                        @* }*@
+                                        @* @if (CanDeleteAuthor)
+                                        {*@
+                                        @if (!context.IsSystemIndicator)
+                                        {
+                                            <DropdownItem Clicked="() => DeleteNationalityAsync(context)">
+                                                Delete
+                                            </DropdownItem>
+                                        }
+
+                                        @* }*@
+                                    </DropdownMenu>
+                                </Dropdown>
+                            </DisplayTemplate>
+                        </DataGridColumn>
+                        <DataGridColumn TItem="NationalityDto"
+                                        Field="@nameof(HIS.Nationalities.NationalityDto.Name)"
+                                        Caption="Name">
+
+                        </DataGridColumn>
+                        
+                        <DataGridNumericColumn TItem="NationalityDto"
+                                               Field="@nameof(HIS.Nationalities.NationalityDto.Sequence)"
+                                               Caption="Sequence">
+                            <FilterTemplate>
+                                <NumericEdit TValue="int" ValueChanged="@(value => { context.TriggerFilterChange( value ); })" />
+                            </FilterTemplate>
+                        </DataGridNumericColumn>
+                        <DataGridCheckColumn Filterable="false" TItem="NationalityDto"
+                                             Field="@nameof(HIS.Nationalities.NationalityDto.IsDefaultIndicator)"
+                                             Caption="IsDefaultIndicator">
+                        </DataGridCheckColumn>
+                        <DataGridCheckColumn Filterable="false" TItem="NationalityDto"
+                                             Field="@nameof(HIS.Nationalities.NationalityDto.IsSystemIndicator)"
+                                             Caption="IsSystemIndicator">
+                        </DataGridCheckColumn>
+                    </DataGridColumns>
+                </DataGrid>
+            </CardBody>
+        </Card>
+    </Div>
+</Div>
+
+
+
+
+
+
+

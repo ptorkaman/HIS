@@ -1,0 +1,131 @@
+﻿@page "/Facilities"
+@using HIS.Facilities
+@using HIS.Localization
+@using Volo.Abp.AspNetCore.Components.Web
+@inherits HISComponentBase
+@inject IFacilityAppService FacilityAppService
+
+<Div Class="row">
+    <Div Class="col-12">
+        <Card>
+            <CardHeader>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <input placeholder="search a value..." @bind="FilterValue" type="text" class="form-control" />
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-3">
+                        <Button Color="Color.Primary" Clicked="@(()=>GetFacilitiesAsync())">Search</Button>
+                    </div>
+                </div>
+
+            </CardHeader>
+        </Card>
+    </Div>
+</Div>
+
+<Div Class="row mt-2">
+    <Div Class="col-12">
+        <Card>
+            <CardHeader>
+                <Row Class="justify-content-between">
+                    <Column ColumnSize="ColumnSize.IsAuto">
+                        <h2>Facilities</h2>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.IsAuto">
+
+                        @* @if (CanCreateAuthor)
+                        {*@
+                        <NavLink href="CreateFacility" class="btn btn-primary">Create Facility</NavLink>
+                        @* }*@
+
+                    </Column>
+                </Row>
+            </CardHeader>
+            <CardBody>
+                <DataGrid TItem="FacilityDto"
+                          Data="FacilityList"
+                          ReadData="OnDataGridReadAsync"
+                          TotalItems="TotalCount"
+                          ShowPager="true"
+                          PageSize="PageSize"
+                          Hoverable="true"
+                          Filterable="true"
+                          FilterMethod="DataGridFilterMethod.Contains">
+
+                    <DataGridColumns>
+                        <DataGridColumn Width="150px"
+                                        TItem="FacilityDto"
+                                        Field="@nameof(HIS.Facilities.FacilityDto.Id)"
+                                        Sortable="false"
+                                        Caption="Actions"
+                                        Filterable="false">
+                            <DisplayTemplate>
+                                <Dropdown>
+                                    <DropdownToggle Color="Color.Primary">
+                                        Actions
+                                    </DropdownToggle>
+                                    <DropdownMenu>
+                                        @*@if (CanEditAuthor)
+                                        {*@
+                                        <a href="@($"/EditFacility/{context.Id}")" class="dropdown-item">
+                                            Edit
+                                        </a>
+                                        @* }*@
+                                        @* @if (CanDeleteAuthor)
+                                        {*@
+                                        @if (!context.IsSystemIndicator)
+                                        {
+                                            <DropdownItem Clicked="() => DeleteFacilityAsync(context)">
+                                                Delete
+                                            </DropdownItem>
+                                        }
+
+                                        @* }*@
+                                    </DropdownMenu>
+                                </Dropdown>
+                            </DisplayTemplate>
+                        </DataGridColumn>
+                        <DataGridColumn TItem="FacilityDto"
+                                        Field="@nameof(HIS.Facilities.FacilityDto.Name)"
+                                        Caption="Name">
+
+                        </DataGridColumn>
+                        <DataGridColumn TItem="FacilityDto"
+                                            Field="@nameof(HIS.Facilities.FacilityDto.Description)"
+                                            Caption="Description">
+                        </DataGridColumn>
+                        <DataGridNumericColumn TItem="FacilityDto"
+                                               Field="@nameof(HIS.Facilities.FacilityDto.Sequence)"
+                                               Caption="Sequence">
+                            <FilterTemplate>
+                                <NumericEdit TValue="int" ValueChanged="@(value => { context.TriggerFilterChange( value ); })" />
+                            </FilterTemplate>
+                        </DataGridNumericColumn>
+                        <DataGridCheckColumn Filterable="false" TItem="FacilityDto"
+                                             Field="@nameof(HIS.Facilities.FacilityDto.IsDefaultIndicator)"
+                                             Caption="IsDefaultIndicator">
+                        </DataGridCheckColumn>
+                        <DataGridCheckColumn Filterable="false" TItem="FacilityDto"
+                                             Field="@nameof(HIS.Facilities.FacilityDto.IsSystemIndicator)"
+                                             Caption="IsSystemIndicator">
+                        </DataGridCheckColumn>
+                    </DataGridColumns>
+                </DataGrid>
+            </CardBody>
+        </Card>
+    </Div>
+</Div>
+
+
+
+
+
+
+

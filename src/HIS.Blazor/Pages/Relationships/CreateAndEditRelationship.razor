@@ -1,0 +1,181 @@
+﻿@page "/CreateRelationship"
+@page "/EditRelationship/{Id:guid}"
+@using HIS.Relationships
+@inject IRelationshipAppService RelationshipAppService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<Card>
+
+    <CardBody>
+        <CardTitle Size="5">@Title Relationship</CardTitle>
+
+        <EditForm Model="RelationshipDto" OnValidSubmit="CreateAndUpdateAsync">
+            <DataAnnotationsValidator />
+            <div class="row">
+
+                <div class="col-4">
+                    <div class="form-group">
+                        <DisplayName For="@(() => RelationshipDto.Name)" />
+                        <InputText class="form-control" @bind-Value="RelationshipDto.Name"></InputText>
+                        <div class="text-danger">
+                            <ValidationMessage For="()=>RelationshipDto.Name"></ValidationMessage>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-4">
+                    <div class="form-group">
+                        <label>Description</label>
+                        <InputText class="form-control" @bind-Value="RelationshipDto.Description"></InputText>
+                        <div class="text-danger">
+                            <ValidationMessage For="()=>RelationshipDto.Description"></ValidationMessage>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col-4">
+                    <div class="form-group">
+                        <label>Sequence</label>
+                        <InputNumber class="form-control" @bind-Value="RelationshipDto.Sequence"></InputNumber>
+                        <div class="text-danger">
+                            <ValidationMessage For="()=>RelationshipDto.Sequence"></ValidationMessage>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <Div Class="row">
+                <div class="col-12">
+                    <div class="form-group">
+                        <label>Comments</label>
+                        <InputTextArea class="form-control" @bind-Value="RelationshipDto.Comments">
+
+                        </InputTextArea>
+                    </div>
+                </div>
+            </Div>
+            <div class="row">
+                <div class="col-3">
+                    <div class="form-check">
+                        <InputCheckbox @onclick="@CheckBoxChanged" class="form-check-input isDefaultIndicator" @bind-Value="RelationshipDto.IsDefaultIndicator">
+
+                        </InputCheckbox>
+                        <label class="form-check-label">
+                            IsDefaultIndicator
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <InputCheckbox  class="form-check-input" @bind-Value="RelationshipDto.IsSystemIndicator">
+
+                        </InputCheckbox>
+                        <label class="form-check-label">
+                            IsSystemIndicator
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4">
+                    <div class="form-group">
+                        <button @onclick="OnClickButton" class="btn btn-primary btnSubmitLookUpForm" type="submit">@Title</button>
+                        <NavLink href="Relationships" class="btn btn-secondary">Back</NavLink>
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+
+    </CardBody>
+</Card>
+
+<div class="modal fade isSystemIndicatorModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">IsDefaultIndicator</h5>
+                <button @onclick="BtnNoModal" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure to make this record as default selection ?
+            </div>
+            <div class="modal-footer">
+                <button @onclick="BtnNoModal" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button @onclick="CreateAndUpdateAsync" type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+    private RelationshipDto RelationshipDto { get; set; } = new RelationshipDto();
+    public string Title { get; set; } = "Create";
+
+
+    private async Task CheckBoxChanged()
+    {
+        await JSRuntime.InvokeVoidAsync("OnChangeCheckBoxIsDefaultIndicator");
+    }
+
+    private async Task OnClickButton()
+    {
+        await JSRuntime.InvokeVoidAsync("OnClickButton");
+    }
+
+    private async Task BtnNoModal()
+    {
+        await JSRuntime.InvokeVoidAsync("BtnNoModal");
+    }
+
+    private async Task BtnYesModal()
+    {
+        await JSRuntime.InvokeVoidAsync("BtnYesModal");
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("OnLoadPage");
+
+        if (Id.HasValue)
+        {
+            Title = "Update";
+            RelationshipDto = await RelationshipAppService.GetAsync(Id.Value);
+        }
+        else
+        {
+            RelationshipDto = new RelationshipDto();
+        }
+    }
+
+    private async Task CreateAndUpdateAsync()
+    {
+
+        try
+        {
+            if (Id.HasValue && Title == "Update")
+            {
+                await JSRuntime.InvokeVoidAsync("BtnNoModal");
+                await RelationshipAppService.UpdateAsync(Id.Value, RelationshipDto);
+                await JSRuntime.ToastrSuccess("Operation is successfull");
+                NavigationManager.NavigateTo("Relationships");
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("BtnNoModal");
+                await RelationshipAppService.CreateAsync(RelationshipDto);
+                await JSRuntime.ToastrSuccess("Operation is successfull");
+                NavigationManager.NavigateTo("Relationships");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("BtnNoModal");
+            await JSRuntime.ToastrError("Operation is failed");
+            NavigationManager.NavigateTo("Relationships");
+        }
+
+    }
+}

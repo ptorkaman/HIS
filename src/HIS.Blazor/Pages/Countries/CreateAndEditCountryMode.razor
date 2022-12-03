@@ -1,0 +1,172 @@
+﻿@page "/CreateCountry"
+@page "/EditCountry/{Id:guid}"
+@using HIS.Countries
+@inject ICountryAppService CountryAppService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<Card>
+
+    <CardBody>
+        <CardTitle Size="5">@Title Country</CardTitle>
+
+        <EditForm Model="CountryDto" OnValidSubmit="CreateAndUpdateAsync">
+            <DataAnnotationsValidator />
+            <div class="row">
+
+                <div class="col-3">
+                    <div class="form-group">
+                       <DisplayName For="@(() => CountryDto.Name)" />
+                        <InputText class="form-control" @bind-Value="CountryDto.Name"></InputText>
+                        <div class="text-danger">
+                            <ValidationMessage For="()=>CountryDto.Name"></ValidationMessage>
+                        </div>
+                    </div>
+                </div>
+
+                 <div class="col-3">
+                    <div class="form-group">
+                       <DisplayName For="@(() => CountryDto.TwoLettersIsoCode)" />
+                        <InputText class="form-control" @bind-Value="CountryDto.TwoLettersIsoCode"></InputText>
+                        <div class="text-danger">
+                            <ValidationMessage For="()=>CountryDto.TwoLettersIsoCode"></ValidationMessage>
+                        </div>
+                    </div>
+                </div>
+                 <div class="col-3">
+                    <div class="form-group">
+                       <DisplayName For="@(() => CountryDto.ThreeLettersIsoCode)" />
+                        <InputText class="form-control" @bind-Value="CountryDto.ThreeLettersIsoCode"></InputText>
+                        <div class="text-danger">
+                            <ValidationMessage For="()=>CountryDto.ThreeLettersIsoCode"></ValidationMessage>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-3">
+                    <div class="form-group">
+                      <DisplayName For="@(() => CountryDto.NumericIsoCode)" />
+                        <InputText class="form-control" @bind-Value="CountryDto.NumericIsoCode"></InputText>
+                        <div class="text-danger">
+                            <ValidationMessage For="()=>CountryDto.NumericIsoCode"></ValidationMessage>
+                        </div>
+                    </div>
+                </div>
+   
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="form-group">
+                       <DisplayName For="@(() => CountryDto.Sequence)" />
+                        <InputNumber class="form-control" @bind-Value="CountryDto.Sequence"></InputNumber>
+                        <div class="text-danger">
+                        <ValidationMessage For="()=>CountryDto.Sequence"></ValidationMessage>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-3">
+                    <div class="form-check">
+                        <InputCheckbox @onclick="@CheckBoxChanged" class="form-check-input isDefaultIndicator" @bind-Value="CountryDto.IsDefaultIndicator">
+
+                        </InputCheckbox>
+                        <label class="form-check-label">
+                            IsDefaultIndicator
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <InputCheckbox class="form-check-input" @bind-Value="CountryDto.IsSystemIndicator">
+
+                        </InputCheckbox>
+                        <label class="form-check-label">
+                            IsSystemIndicator
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4">
+                    <div class="form-group">
+                        <button  @onclick="OnClickButton" class="btn btn-primary btnSubmitLookUpForm" type="submit">@Title</button>
+                        <NavLink href="Countries" class="btn btn-secondary">Back</NavLink>
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+
+    </CardBody>
+</Card>
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+    private CountryDto CountryDto { get; set; } = new CountryDto();
+    public string Title { get; set; } = "Create";
+
+
+    private async Task CheckBoxChanged()
+    {
+        await JSRuntime.InvokeVoidAsync("OnChangeCheckBoxIsDefaultIndicator");
+    }
+
+    private async Task OnClickButton()
+    {
+        await JSRuntime.InvokeVoidAsync("OnClickButton");
+    }
+
+    private async Task BtnNoModal()
+    {
+        await JSRuntime.InvokeVoidAsync("BtnNoModal");
+    }
+
+    private async Task BtnYesModal()
+    {
+        await JSRuntime.InvokeVoidAsync("BtnYesModal");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+         await JSRuntime.InvokeVoidAsync("OnLoadPage");
+
+        if (Id.HasValue)
+        {
+            Title = "Update";
+            CountryDto = await CountryAppService.GetAsync(Id.Value);
+        }
+        else
+        {
+            CountryDto = new CountryDto();
+        }
+    }
+
+    private async Task CreateAndUpdateAsync()
+    {
+        try
+        {
+            if (Id.HasValue && Title == "Update")
+            {
+                 await JSRuntime.InvokeVoidAsync("BtnNoModal");
+                await CountryAppService.UpdateAsync(Id.Value, CountryDto);
+                await JSRuntime.ToastrSuccess("Operation is successfull");
+                NavigationManager.NavigateTo("Countries");
+            }
+            else
+            {
+                 await JSRuntime.InvokeVoidAsync("BtnNoModal");
+                await CountryAppService.CreateAsync(CountryDto);
+                await JSRuntime.ToastrSuccess("Operation is successfull");
+                NavigationManager.NavigateTo("Countries");
+            }
+        }
+        catch (Exception ex)
+        {
+             await JSRuntime.InvokeVoidAsync("BtnNoModal");
+            await JSRuntime.ToastrError("Operation is failed");
+            NavigationManager.NavigateTo("Countries");
+        }
+
+    }
+}

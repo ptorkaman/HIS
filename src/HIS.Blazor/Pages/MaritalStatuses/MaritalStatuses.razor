@@ -1,0 +1,131 @@
+﻿@page "/MaritalStatuses"
+@using HIS.MaritalStatuses
+@using HIS.Localization
+@using Volo.Abp.AspNetCore.Components.Web
+@inherits HISComponentBase
+@inject IMaritalStatusAppService MaritalStatusAppService
+
+<Div Class="row">
+    <Div Class="col-12">
+        <Card>
+            <CardHeader>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <input placeholder="search a value..." @bind="FilterValue" type="text" class="form-control" />
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-3">
+                        <Button Color="Color.Primary" Clicked="@(()=>GetMaritalStatusesAsync())">Search</Button>
+                    </div>
+                </div>
+
+            </CardHeader>
+        </Card>
+    </Div>
+</Div>
+
+<Div Class="row mt-2">
+    <Div Class="col-12">
+        <Card>
+            <CardHeader>
+                <Row Class="justify-content-between">
+                    <Column ColumnSize="ColumnSize.IsAuto">
+                        <h2>MaritalStatuses</h2>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.IsAuto">
+
+                        @* @if (CanCreateAuthor)
+                        {*@
+                        <NavLink href="CreateMaritalStatus" class="btn btn-primary">Create MaritalStatus</NavLink>
+                        @* }*@
+
+                    </Column>
+                </Row>
+            </CardHeader>
+            <CardBody>
+                <DataGrid TItem="MaritalStatusDto"
+                          Data="MaritalStatusList"
+                          ReadData="OnDataGridReadAsync"
+                          TotalItems="TotalCount"
+                          ShowPager="true"
+                          PageSize="PageSize"
+                          Hoverable="true"
+                          Filterable="true"
+                          FilterMethod="DataGridFilterMethod.Contains">
+
+                    <DataGridColumns>
+                        <DataGridColumn Width="150px"
+                                        TItem="MaritalStatusDto"
+                                        Field="@nameof(HIS.MaritalStatuses.MaritalStatusDto.Id)"
+                                        Sortable="false"
+                                        Caption="Actions"
+                                        Filterable="false">
+                            <DisplayTemplate>
+                                <Dropdown>
+                                    <DropdownToggle Color="Color.Primary">
+                                        Actions
+                                    </DropdownToggle>
+                                    <DropdownMenu>
+                                        @*@if (CanEditAuthor)
+                                        {*@
+                                        <a href="@($"/EditMaritalStatus/{context.Id}")" class="dropdown-item">
+                                            Edit
+                                        </a>
+                                        @* }*@
+                                        @* @if (CanDeleteAuthor)
+                                        {*@
+                                        @if (!context.IsSystemIndicator)
+                                        {
+                                            <DropdownItem Clicked="() => DeleteMaritalStatusAsync(context)">
+                                                Delete
+                                            </DropdownItem>
+                                        }
+
+                                        @* }*@
+                                    </DropdownMenu>
+                                </Dropdown>
+                            </DisplayTemplate>
+                        </DataGridColumn>
+                        <DataGridColumn TItem="MaritalStatusDto"
+                                        Field="@nameof(HIS.MaritalStatuses.MaritalStatusDto.Name)"
+                                        Caption="Name">
+
+                        </DataGridColumn>
+                        <DataGridColumn TItem="MaritalStatusDto"
+                                            Field="@nameof(HIS.MaritalStatuses.MaritalStatusDto.Description)"
+                                            Caption="Description">
+                        </DataGridColumn>
+                        <DataGridNumericColumn TItem="MaritalStatusDto"
+                                               Field="@nameof(HIS.MaritalStatuses.MaritalStatusDto.Sequence)"
+                                               Caption="Sequence">
+                            <FilterTemplate>
+                                <NumericEdit TValue="int" ValueChanged="@(value => { context.TriggerFilterChange( value ); })" />
+                            </FilterTemplate>
+                        </DataGridNumericColumn>
+                        <DataGridCheckColumn Filterable="false" TItem="MaritalStatusDto"
+                                             Field="@nameof(HIS.MaritalStatuses.MaritalStatusDto.IsDefaultIndicator)"
+                                             Caption="IsDefaultIndicator">
+                        </DataGridCheckColumn>
+                        <DataGridCheckColumn Filterable="false" TItem="MaritalStatusDto"
+                                             Field="@nameof(HIS.MaritalStatuses.MaritalStatusDto.IsSystemIndicator)"
+                                             Caption="IsSystemIndicator">
+                        </DataGridCheckColumn>
+                    </DataGridColumns>
+                </DataGrid>
+            </CardBody>
+        </Card>
+    </Div>
+</Div>
+
+
+
+
+
+
+

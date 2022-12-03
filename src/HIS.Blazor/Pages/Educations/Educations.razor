@@ -1,0 +1,131 @@
+﻿@page "/Educations"
+@using HIS.Educations
+@using HIS.Localization
+@using Volo.Abp.AspNetCore.Components.Web
+@inherits HISComponentBase
+@inject IEducationAppService EducationAppService
+
+<Div Class="row">
+    <Div Class="col-12">
+        <Card>
+            <CardHeader>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <input placeholder="search a value..." @bind="FilterValue" type="text" class="form-control" />
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-3">
+                        <Button Color="Color.Primary" Clicked="@(()=>GetEducationsAsync())">Search</Button>
+                    </div>
+                </div>
+
+            </CardHeader>
+        </Card>
+    </Div>
+</Div>
+
+<Div Class="row mt-2">
+    <Div Class="col-12">
+        <Card>
+            <CardHeader>
+                <Row Class="justify-content-between">
+                    <Column ColumnSize="ColumnSize.IsAuto">
+                        <h2>Educations</h2>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.IsAuto">
+
+                        @* @if (CanCreateAuthor)
+                        {*@
+                        <NavLink href="CreateEducation" class="btn btn-primary">Create Education</NavLink>
+                        @* }*@
+
+                    </Column>
+                </Row>
+            </CardHeader>
+            <CardBody>
+                <DataGrid TItem="EducationDto"
+                          Data="EducationList"
+                          ReadData="OnDataGridReadAsync"
+                          TotalItems="TotalCount"
+                          ShowPager="true"
+                          PageSize="PageSize"
+                          Hoverable="true"
+                          Filterable="true"
+                          FilterMethod="DataGridFilterMethod.Contains">
+
+                    <DataGridColumns>
+                        <DataGridColumn Width="150px"
+                                        TItem="EducationDto"
+                                        Field="@nameof(HIS.Educations.EducationDto.Id)"
+                                        Sortable="false"
+                                        Caption="Actions"
+                                        Filterable="false">
+                            <DisplayTemplate>
+                                <Dropdown>
+                                    <DropdownToggle Color="Color.Primary">
+                                        Actions
+                                    </DropdownToggle>
+                                    <DropdownMenu>
+                                        @*@if (CanEditAuthor)
+                                        {*@
+                                        <a href="@($"/EditEducation/{context.Id}")" class="dropdown-item">
+                                            Edit
+                                        </a>
+                                        @* }*@
+                                        @* @if (CanDeleteAuthor)
+                                        {*@
+                                        @if (!context.IsSystemIndicator)
+                                        {
+                                            <DropdownItem Clicked="() => DeleteEducationAsync(context)">
+                                                Delete
+                                            </DropdownItem>
+                                        }
+
+                                        @* }*@
+                                    </DropdownMenu>
+                                </Dropdown>
+                            </DisplayTemplate>
+                        </DataGridColumn>
+                        <DataGridColumn TItem="EducationDto"
+                                        Field="@nameof(HIS.Educations.EducationDto.Name)"
+                                        Caption="Name">
+
+                        </DataGridColumn>
+                        <DataGridColumn TItem="EducationDto"
+                                            Field="@nameof(HIS.Educations.EducationDto.Description)"
+                                            Caption="Description">
+                        </DataGridColumn>
+                        <DataGridNumericColumn TItem="EducationDto"
+                                               Field="@nameof(HIS.Educations.EducationDto.Sequence)"
+                                               Caption="Sequence">
+                            <FilterTemplate>
+                                <NumericEdit TValue="int" ValueChanged="@(value => { context.TriggerFilterChange( value ); })" />
+                            </FilterTemplate>
+                        </DataGridNumericColumn>
+                        <DataGridCheckColumn Filterable="false" TItem="EducationDto"
+                                             Field="@nameof(HIS.Educations.EducationDto.IsDefaultIndicator)"
+                                             Caption="IsDefaultIndicator">
+                        </DataGridCheckColumn>
+                        <DataGridCheckColumn Filterable="false" TItem="EducationDto"
+                                             Field="@nameof(HIS.Educations.EducationDto.IsSystemIndicator)"
+                                             Caption="IsSystemIndicator">
+                        </DataGridCheckColumn>
+                    </DataGridColumns>
+                </DataGrid>
+            </CardBody>
+        </Card>
+    </Div>
+</Div>
+
+
+
+
+
+
+

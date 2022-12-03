@@ -1,0 +1,156 @@
+﻿@page "/InActiveReasons"
+@using HIS.Blazor.Helper
+@using HIS.Enums
+@using HIS.InActiveReasons
+@using HIS.Localization
+@using Volo.Abp.AspNetCore.Components.Web
+@inject IJSRuntime JSRuntime
+@inherits HISComponentBase
+@inject IInActiveReasonAppService InActiveReasonAppService
+
+<Div Class="row">
+    <Div Class="col-12">
+        <Card>
+            <CardHeader>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <input placeholder="search a value..." @bind="FilterValue" type="text" class="form-control" />
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-3">
+                        <Button Color="Color.Primary" Clicked="@(()=>GetInActiveReasonsAsync())">Search</Button>
+                    </div>
+                </div>
+
+            </CardHeader>
+        </Card>
+    </Div>
+</Div>
+
+<Div Class="row mt-2">
+    <Div Class="col-12">
+        <Card>
+            <CardHeader>
+                <Row Class="justify-content-between">
+                    <Column ColumnSize="ColumnSize.IsAuto">
+                        <h2>InActiveReasons</h2>
+                    </Column>
+                    <Column ColumnSize="ColumnSize.IsAuto">
+
+                        @* @if (CanCreateAuthor)
+                        {*@
+                        <NavLink href="CreateInActiveReason" class="btn btn-primary">Create InActiveReason</NavLink>
+                        @* }*@
+
+                    </Column>
+                </Row>
+            </CardHeader>
+            <CardBody>
+                <DataGrid TItem="InActiveReasonDto"
+                          Data="InActiveReasonList"
+                          ReadData="OnDataGridReadAsync"
+                          TotalItems="TotalCount"
+                          ShowPager="true"
+                          PageSize="PageSize"
+                          Hoverable="true"
+                          Filterable="true"
+                          FilterMethod="DataGridFilterMethod.Contains">
+
+                    <DataGridColumns>
+                        <DataGridColumn Width="150px"
+                                        TItem="InActiveReasonDto"
+                                        Field="@nameof(HIS.InActiveReasons.InActiveReasonDto.Id)"
+                                        Sortable="false"
+                                        Caption="Actions"
+                                        Filterable="false">
+                            <DisplayTemplate>
+                                <Dropdown>
+                                    <DropdownToggle Color="Color.Primary">
+                                        Actions
+                                    </DropdownToggle>
+                                    <DropdownMenu>
+                                        @*@if (CanEditAuthor)
+                                        {*@
+                                        <a href="@($"/EditInActiveReason/{context.Id}")" class="dropdown-item">
+                                            Edit
+                                        </a>
+                                        @* }*@
+                                        @* @if (CanDeleteAuthor)
+                                        {*@
+                                        @if (!context.IsSystemIndicator)
+                                        {
+                                            <DropdownItem Clicked="() => DeleteInActiveReasonAsync(context)">
+                                                Delete
+                                            </DropdownItem>
+                                        }
+
+                                        @* }*@
+                                    </DropdownMenu>
+                                </Dropdown>
+                            </DisplayTemplate>
+                        </DataGridColumn>
+                        <DataGridColumn TItem="InActiveReasonDto"
+                                        Field="@nameof(HIS.InActiveReasons.InActiveReasonDto.Name)"
+                                        Caption="Name">
+
+                        </DataGridColumn>
+                        <DataGridColumn TItem="InActiveReasonDto"
+                                        Field="@nameof(HIS.InActiveReasons.InActiveReasonDto.Description)"
+                                        Caption="Description">
+                        </DataGridColumn>
+                        <DataGridColumn Width="250px" TItem="InActiveReasonDto"
+                                        Field="@nameof(HIS.InActiveReasons.InActiveReasonDto.InActiveStatus)"
+                                        Caption="InActiveStatus">
+
+
+                            <DisplayTemplate>
+                                @context.InActiveStatus.GetDisplayAttributeValues().Name
+                            </DisplayTemplate>
+                            <FilterTemplate>
+                                <Select TValue="InActiveStatusEnum?" SelectedValueChanged="@(value => { context.TriggerFilterChange( value ); })">
+                                    @foreach (Enum inActiveStatusEnum in Enum.GetValues(typeof(InActiveStatusEnum)))
+                                    {
+                                        <SelectItem Value="@inActiveStatusEnum">
+                                            @inActiveStatusEnum.GetDisplayAttributeValues().Name
+                                        </SelectItem>
+                                    }
+
+                                </Select>
+                            </FilterTemplate>
+
+
+                        </DataGridColumn>
+                        <DataGridNumericColumn TItem="InActiveReasonDto"
+                                               Field="@nameof(HIS.InActiveReasons.InActiveReasonDto.Sequence)"
+                                               Caption="Sequence">
+                            <FilterTemplate>
+                                <NumericEdit TValue="int" ValueChanged="@(value => { context.TriggerFilterChange( value ); })" />
+                            </FilterTemplate>
+                        </DataGridNumericColumn>
+                        <DataGridCheckColumn Filterable="false" TItem="InActiveReasonDto"
+                                             Field="@nameof(HIS.InActiveReasons.InActiveReasonDto.IsDefaultIndicator)"
+                                             Caption="IsDefaultIndicator">
+                        </DataGridCheckColumn>
+                        <DataGridCheckColumn Filterable="false" TItem="InActiveReasonDto"
+                                             Field="@nameof(HIS.InActiveReasons.InActiveReasonDto.IsSystemIndicator)"
+                                             Caption="IsSystemIndicator">
+                        </DataGridCheckColumn>
+                    </DataGridColumns>
+                </DataGrid>
+            </CardBody>
+        </Card>
+    </Div>
+</Div>
+
+
+
+
+
+
+

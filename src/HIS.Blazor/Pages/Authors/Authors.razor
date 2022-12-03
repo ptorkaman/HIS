@@ -1,0 +1,103 @@
+﻿@page "/authors"
+@using HIS.Authors
+@using HIS.Localization
+@using Volo.Abp.AspNetCore.Components.Web
+@inherits HISComponentBase
+@inject IAuthorAppService AuthorAppService
+@inject AbpBlazorMessageLocalizerHelper<HISResource> LH
+
+<Card>
+    <CardHeader>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="form-group">
+                    <input placeholder="search a value..." @bind="FilterValue" type="text" class="form-control" />
+
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-3">
+                <Button Color="Color.Primary" Clicked="@(()=>GetAuthorsAsync())">Search</Button>
+            </div>
+        </div>
+
+    </CardHeader>
+</Card>
+
+<Card>
+    <CardHeader>
+        <Row Class="justify-content-between">
+            <Column ColumnSize="ColumnSize.IsAuto">
+                <h2>Authors</h2>
+            </Column>
+            <Column ColumnSize="ColumnSize.IsAuto">
+
+                @* @if (CanCreateAuthor)
+                {*@
+                <NavLink href="CreateAuthor" class="btn btn-primary">Create Author</NavLink>
+                @* }*@
+
+            </Column>
+        </Row>
+    </CardHeader>
+    <CardBody>
+        <DataGrid TItem="AuthorDto"
+                  Data="AuthorList"
+                  ReadData="OnDataGridReadAsync"
+                  TotalItems="TotalCount"
+                  ShowPager="true"
+                  PageSize="PageSize"
+                  Hoverable="true">
+
+            <DataGridColumns>
+                <DataGridColumn Width="150px"
+                                TItem="AuthorDto"
+                                Field="@nameof(AuthorDto.Id)"
+                                Sortable="false"
+                                Caption="Actions"
+                                Filterable="false">
+                    <DisplayTemplate>
+                        <Dropdown>
+                            <DropdownToggle Color="Color.Primary">
+                                Actions
+                            </DropdownToggle>
+                            <DropdownMenu>
+                                @*@if (CanEditAuthor)
+                                {*@
+                                <a href="@($"/EditAutor/{context.Id}")" class="dropdown-item">
+                                    Edit
+                                </a>
+                                @* }*@
+                                @* @if (CanDeleteAuthor)
+                                {*@
+                                <DropdownItem Clicked="() => DeleteAuthorAsync(context)">
+                                    Delete
+                                </DropdownItem>
+                                @* }*@
+                            </DropdownMenu>
+                        </Dropdown>
+                    </DisplayTemplate>
+                </DataGridColumn>
+                <DataGridColumn TItem="AuthorDto"
+                                Field="@nameof(AuthorDto.Name)"
+                                Caption="Name">
+
+                </DataGridColumn>
+                <DataGridDateColumn CustomFilter="@OnDateCustomFilter" TItem="AuthorDto"
+                                    Field="@nameof(AuthorDto.BirthDate)"
+                                    Caption="BirthDate">
+                    <DisplayTemplate>
+                        @context.BirthDate.ToShortDateString()
+                    </DisplayTemplate>
+                </DataGridDateColumn>
+            </DataGridColumns>
+        </DataGrid>
+    </CardBody>
+</Card>
+
+
+
+

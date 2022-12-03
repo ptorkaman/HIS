@@ -1,0 +1,99 @@
+﻿@page "/CreateAuthor"
+@page "/EditAutor/{Id:guid}"
+@using HIS.Authors
+@inject IAuthorAppService AuthorAppService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<Card>
+
+    <CardBody>
+        <CardTitle Size="5">@Title Author</CardTitle>
+
+        <EditForm Model="AuthorDto" OnValidSubmit="CreateAndUpdateAsync">
+            <DataAnnotationsValidator />
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <InputText class="form-control" @bind-Value="AuthorDto.Name"></InputText>
+                        <div class="text-danger">
+                            <ValidationMessage For="()=>AuthorDto.Name"></ValidationMessage>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>BirthDate</label>
+                        <DateEdit TValue="DateTime" @bind-Date="@AuthorDto.BirthDate" />
+                    </div>
+                </div>
+
+            </div>
+            <Div Class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>ShortBio</label>
+                        <InputTextArea class="form-control" @bind-Value="AuthorDto.ShortBio"></InputTextArea>
+                    </div>
+                </div>
+            </Div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <button class="btn btn-primary" type="submit">@Title</button>
+                        <NavLink href="authors" class="btn btn-secondary">Back</NavLink>
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+
+    </CardBody>
+</Card>
+
+@code {
+    DatePicker<DateTime> datePicker;
+
+    [Parameter]
+    public Guid? Id { get; set; }
+    private AuthorDto AuthorDto { get; set; } = new AuthorDto();
+    public string Title { get; set; } = "Create";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id.HasValue)
+        {
+            Title = "Update";
+            AuthorDto = await AuthorAppService.GetAsync(Id.Value);
+        }
+        else
+        {
+            AuthorDto = new AuthorDto();
+        }
+    }
+
+    private async Task CreateAndUpdateAsync()
+    {
+        try
+        {
+            if (Id.HasValue && Title == "Update")
+            {
+                await AuthorAppService.UpdateAsync(Id.Value, AuthorDto);
+                await JSRuntime.ToastrSuccess("Operation is successfull");
+                NavigationManager.NavigateTo("authors");
+            }
+            else
+            {
+                await AuthorAppService.CreateAsync(AuthorDto);
+                await JSRuntime.ToastrSuccess("Operation is successfull");
+                NavigationManager.NavigateTo("authors");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.ToastrError("Operation is failed");
+            NavigationManager.NavigateTo("authors");
+        }
+
+    }
+}
